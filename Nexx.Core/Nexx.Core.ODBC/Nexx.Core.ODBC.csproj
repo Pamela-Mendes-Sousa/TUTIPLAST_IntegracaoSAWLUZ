@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Nexx.Core.Entities\Nexx.Core.Entities.csproj" />
+    <ProjectReference Include="..\Nexx.Core.Logging\Nexx.Core.Logging.csproj" />
+    <ProjectReference Include="..\Nexx.Core.Mapping\Nexx.Core.Mapping.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Data.Odbc" Version="9.0.3" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

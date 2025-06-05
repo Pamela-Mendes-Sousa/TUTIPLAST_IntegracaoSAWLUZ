@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-ExcelCRCP-8a61fd2e-248c-494e-b302-daada591d3ac</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Excel\**" />
+    <Content Remove="Excel\**" />
+    <EmbeddedResource Remove="Excel\**" />
+    <None Remove="Excel\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+  </ItemGroup>
+  
+  <!--NexxCore-->
+  <ItemGroup>
+    <ProjectReference Include="..\Nexx.Core\Nexx.Core.Entities\Nexx.Core.Entities.csproj" />
+    <ProjectReference Include="..\Nexx.Core\Nexx.Core.IoC\Nexx.Core.IoC.csproj" />
+    <ProjectReference Include="..\Nexx.Core\Nexx.Core.Logging\Nexx.Core.Logging.csproj" />
+    <ProjectReference Include="..\Nexx.Core\Nexx.Core.Mapping\Nexx.Core.Mapping.csproj" />
+    <ProjectReference Include="..\Nexx.Core\Nexx.Core.ODBC\Nexx.Core.ODBC.csproj" />
+    <ProjectReference Include="..\Nexx.Core\Nexx.Core.ServiceLayer\Nexx.Core.ServiceLayer.csproj" />
+  </ItemGroup>
+  
+
+  <ItemGroup>
+    <Folder Include="Documents\" />
+    <Folder Include="Instaladores\" />
+  </ItemGroup>
+  
+
+  <ItemGroup>
+    <None Update="DataBase\Queries\FindPedidoVenda.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataBase\Queries\InsertNEXX_LOG.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataBase\Queries\SelectNEXX_LOG.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataBase\Queries\SelectNEXX_OBJ.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataBase\Queries\UpdateNEXX_LOG.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

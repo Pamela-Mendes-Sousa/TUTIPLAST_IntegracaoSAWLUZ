@@ -1,0 +1,257 @@
+﻿{
+  "UserTables": [
+    {
+      "TableName": "NEXX_LOG",
+      "TableDescription": "Nexx Logs",
+      "TableType": "bott_MasterData"
+    },
+    {
+      "TableName": "NEXX_OBJETOS",
+      "TableDescription": "Nexx OBJETOS",
+      "TableType": "bott_MasterData"
+    }
+  ],
+  "UserFields": [
+    {
+      "TableName": "@NEXX_LOG",
+      "Name": "NEXX_TipoDoc",
+      "Description": "Tipo Documento",
+      "Type": "db_Alpha",
+      "EditSize": 150
+    },
+    {
+      "TableName": "@NEXX_LOG",
+      "Name": "NEXX_IdDoc",
+      "Description": "ID Documento",
+      "Type": "db_Alpha",
+      "EditSize": 150
+    },
+    {
+      "TableName": "@NEXX_LOG",
+      "Name": "NEXX_DtRegi",
+      "Description": "Data do Registro",
+      "Type": "db_Date"
+    },
+    {
+      "TableName": "@NEXX_LOG",
+      "Name": "NEXX_DtInteg",
+      "Description": "Data da Integração",
+      "Type": "db_Date"
+    },
+    {
+      "TableName": "@NEXX_LOG",
+      "Name": "NEXX_Status",
+      "Description": "Status",
+      "Type": "db_Alpha",
+      "EditSize": 1
+    },
+    {
+      "TableName": "@NEXX_LOG",
+      "Name": "NEXX_IdRet",
+      "Description": "ID Retorno",
+      "Type": "db_Alpha",
+      "EditSize": 150
+    },
+    {
+      "TableName": "@NEXX_LOG",
+      "Name": "NEXX_MsgRet",
+      "Description": "Mensagem",
+      "Type": "db_Memo",
+      "EditSize": 99999
+    },
+    {
+      "TableName": "@NEXX_LOG",
+      "Name": "NEXX_JsonEnv",
+      "Description": "JSON de Envio",
+      "Type": "db_Memo",
+      "EditSize": 99999
+    },
+    {
+      "TableName": "@NEXX_LOG",
+      "Name": "NEXX_JsonRet",
+      "Description": "JSON de Retorno",
+      "Type": "db_Memo",
+      "EditSize": 99999
+    },
+    {
+      "TableName": "@NEXX_LOG",
+      "Name": "NEXX_IdDocLeg",
+      "Description": "ID Documento Legado",
+      "Type": "db_Alpha",
+      "EditSize": 150
+    },
+    {
+      "TableName": "@NEXX_OBJETOS",
+      "Name": "NEXX_Table",
+      "Description": "Tabela",
+      "Type": "db_Alpha",
+      "EditSize": 150
+    },
+    {
+      "TableName": "@NEXX_OBJETOS",
+      "Name": "NEXX_Table_Desc",
+      "Description": "Descrição da Tabela",
+      "Type": "db_Alpha",
+      "EditSize": 200
+    },
+    {
+      "TableName": "@NEXX_OBJETOS",
+      "Name": "NEXX_PrimaryKey",
+      "Description": "Primary key",
+      "Type": "db_Alpha",
+      "EditSize": 150
+    },
+    {
+      "TableName": "@NEXX_OBJETOS",
+      "Name": "NEXX_ObjectType",
+      "Description": "Tipo do Objeto",
+      "Type": "db_Alpha",
+      "EditSize": 150
+    }
+  ],
+  "UserObjects": [
+    {
+      "TableName": "NEXX_LOG",
+      "Name": "Nexx Logs",
+      "Code": "NEXX_LOG",
+      "ObjectType": "boud_MasterData",
+      "UseUniqueFormType": "tYES",
+      "CanCreateDefaultForm": "tYES",
+      "CanFind": "tYES",
+      "CanDelete": "tYES",
+      "CanCancel": "tYES",
+      "MenuUID": "NEXX_LOG",
+      "RebuildEnhancedForm": "tNO",
+      "UserObjectMD_FormColumns": [
+        {
+          "FormColumnAlias": "Code",
+          "FormColumnDescription": "Código",
+          "FormColumnNumber": 1,
+          "SonNumber": 0,
+          "Editable": "tYES"
+        },
+        {
+          "FormColumnAlias": "U_NEXX_TipoDoc",
+          "FormColumnDescription": "Tipo Documento",
+          "FormColumnNumber": 2,
+          "SonNumber": 0,
+          "Editable": "tYES"
+        },
+        {
+          "FormColumnAlias": "U_NEXX_IdDoc",
+          "FormColumnDescription": "ID Documento",
+          "FormColumnNumber": 3,
+          "SonNumber": 0,
+          "Editable": "tYES"
+        },
+        {
+          "FormColumnAlias": "U_NEXX_DtRegi",
+          "FormColumnDescription": "Data do Registro",
+          "FormColumnNumber": 4,
+          "SonNumber": 0,
+          "Editable": "tYES"
+        },
+        {
+          "FormColumnAlias": "U_NEXX_DtInteg",
+          "FormColumnDescription": "Data do Registro",
+          "FormColumnNumber": 5,
+          "SonNumber": 0,
+          "Editable": "tYES"
+        },
+        {
+          "FormColumnAlias": "U_NEXX_Status",
+          "FormColumnDescription": "Status",
+          "FormColumnNumber": 6,
+          "SonNumber": 0,
+          "Editable": "tYES"
+        },
+        {
+          "FormColumnAlias": "U_NEXX_IdRet",
+          "FormColumnDescription": "ID Retorno",
+          "FormColumnNumber": 7,
+          "SonNumber": 0,
+          "Editable": "tYES"
+        },
+        {
+          "FormColumnAlias": "U_NEXX_MsgRet",
+          "FormColumnDescription": "Mensagem",
+          "FormColumnNumber": 8,
+          "SonNumber": 0,
+          "Editable": "tYES"
+        },
+        {
+          "FormColumnAlias": "U_NEXX_JsonEnv",
+          "FormColumnDescription": "JSON Envio",
+          "FormColumnNumber": 9,
+          "SonNumber": 0,
+          "Editable": "tYES"
+        },
+        {
+          "FormColumnAlias": "U_NEXX_JsonRet",
+          "FormColumnDescription": "JSON Retorno",
+          "FormColumnNumber": 10,
+          "SonNumber": 0,
+          "Editable": "tYES"
+        },
+        {
+          "FormColumnAlias": "U_NEXX_IdDocLeg",
+          "FormColumnDescription": "ID Documento Legado",
+          "FormColumnNumber": 11,
+          "SonNumber": 0,
+          "Editable": "tYES"
+        }
+      ]
+    },
+    {
+      "TableName": "NEXX_OBJETOS",
+      "Name": "Nexx OBJETOS",
+      "Code": "NEXX_OBJETOS",
+      "ObjectType": "boud_MasterData",
+      "UseUniqueFormType": "tYES",
+      "CanCreateDefaultForm": "tYES",
+      "CanFind": "tYES",
+      "CanDelete": "tYES",
+      "CanCancel": "tYES",
+      "MenuUID": "NEXX_OBJETOS",
+      "RebuildEnhancedForm": "tNO",
+      "UserObjectMD_FormColumns": [
+        {
+          "FormColumnAlias": "Code",
+          "FormColumnDescription": "Código",
+          "FormColumnNumber": 1,
+          "SonNumber": 0,
+          "Editable": "tYES"
+        },
+        {
+          "FormColumnAlias": "U_NEXX_Table",
+          "FormColumnDescription": "Tabela",
+          "FormColumnNumber": 2,
+          "SonNumber": 0,
+          "Editable": "tYES"
+        },
+        {
+          "FormColumnAlias": "U_NEXX_Table_Desc",
+          "FormColumnDescription": "Descrição da Tabela",
+          "FormColumnNumber": 3,
+          "SonNumber": 0,
+          "Editable": "tYES"
+        },
+        {
+          "FormColumnAlias": "U_NEXX_PrimaryKey",
+          "FormColumnDescription": "Chave Primaria",
+          "FormColumnNumber": 4,
+          "SonNumber": 0,
+          "Editable": "tYES"
+        },
+        {
+          "FormColumnAlias": "U_NEXX_ObjectType",
+          "FormColumnDescription": "Tipo do Objeto",
+          "FormColumnNumber": 5,
+          "SonNumber": 0,
+          "Editable": "tYES"
+        }
+      ]
+    }
+  ]
+
+}

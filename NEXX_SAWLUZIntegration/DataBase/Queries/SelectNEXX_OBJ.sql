@@ -1,0 +1,1 @@
+﻿SELECT "U_Table_Desc" FROM "@NEXX_OBJETOS" WHERE "U_ObjectType" ='{0}'

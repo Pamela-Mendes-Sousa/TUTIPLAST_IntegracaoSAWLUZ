@@ -1,0 +1,1 @@
+﻿SELECT COUNT(*) FROM ORDR WHERE TO_VARCHAR("DocNum") = '{0}'
