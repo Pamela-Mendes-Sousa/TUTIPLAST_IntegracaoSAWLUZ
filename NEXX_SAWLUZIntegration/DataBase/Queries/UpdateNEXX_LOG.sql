@@ -1,7 +1,7 @@
 ﻿UPDATE "@NEXX_LOG" 
 SET "U_NEXX_TipoDoc" = '{1}',
 "U_NEXX_IdDoc"  = '{2}',
-"U_NEXX_DtInteg" = '{3}',
+"U_NEXX_DtInteg" = current_date,
 "U_NEXX_Status" = '{4}',
 "U_NEXX_IdRet" = '{5}',
 "U_NEXX_MsgRet" = '{6}',

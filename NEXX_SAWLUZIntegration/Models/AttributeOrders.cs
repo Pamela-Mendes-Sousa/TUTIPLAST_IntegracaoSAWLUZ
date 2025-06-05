@@ -11,55 +11,55 @@ namespace NEXX_SAWLUZIntegration.Models
     {
         [Layout(0, 20)] //inicio, tamanho
         public string ClienteInterno { get; set; }
-        [Layout(21, 20)]
+        [Layout(20, 20)]
         public string ProdutoLocal { get; set; }
-        [Layout(41, 30)]
+        [Layout(40, 30)]
         public string ProdutoCliente { get; set; }
-        [Layout(71, 12)]
+        [Layout(70, 12)]
         public string PedidoNro { get; set; }
-        [Layout(83, 7)]
+        [Layout(82, 7)]
         public string Fabrica { get; set; }
-        [Layout(90, 16)]
+        [Layout(89, 16)]
         public string Local_PE { get; set; }
-        [Layout(106, 1)]
+        [Layout(105, 1)]
         public string TipoFornecimento { get; set; }
-        [Layout(107, 10)]
+        [Layout(106, 10)]
         public string Quantidade { get; set; }
-        [Layout(117, 15)]
+        [Layout(116, 15)]
         public string DtHrDE { get; set; }
-        [Layout(132, 15)]
+        [Layout(131, 15)]
         public string CallDelivery { get; set; }
-        [Layout(147, 15)]
+        [Layout(146, 15)]
         public string ProgramaAtualDtHr { get; set; }
-        [Layout(162, 14)]
+        [Layout(161, 14)]
         public string HONDA_SlipNumber { get; set; }
-        [Layout(176, 2)]
+        [Layout(175, 2)]
         public string HONDA_TipoPedido { get; set; }
-        [Layout(178, 12)]
+        [Layout(177, 12)]
         public string HONDA_ProductionLotNumber { get; set; }
-        [Layout(190, 12)]
+        [Layout(189, 12)]
         public string HONDA_Seppen { get; set; }
-        [Layout(202, 3)]
+        [Layout(201, 3)]
         public string HONDA_InitialProductionControl { get; set; }
-        [Layout(205, 16)]
+        [Layout(204, 16)]
         public string Doca_PE { get; set; }
-        [Layout(221, 10)]
+        [Layout(220, 10)]
         public string PontoDeCorteDocumento { get; set; }
-        [Layout(231, 4)]
+        [Layout(230, 4)]
         public string UE_Serie { get; set; }
-        [Layout(235, 8)]
+        [Layout(234, 8)]
         public string UE_DtHrEmissao { get; set; }
-        [Layout(243, 3)]
+        [Layout(242, 3)]
         public string Orig_PE_PD { get; set; }
-        [Layout(246, 15)]
+        [Layout(245, 15)]
         public string MovimentoDtHr { get; set; }
-        [Layout(261, 14)]
+        [Layout(260, 14)]
         public string AcumuladoProgramadoPE_Qtd { get; set; }
-        [Layout(275, 14)]
+        [Layout(274, 14)]
         public string AcumuladoProgramadoPD_Qtd { get; set; }
-        [Layout(289, 3)]
+        [Layout(288, 3)]
         public string Frequencia { get; set; }
-        [Layout(292, 2)]
+        [Layout(291, 2)]
         public string IdPrograma { get; set; }
 
 
@@ -84,29 +84,38 @@ namespace NEXX_SAWLUZIntegration.Models
         public static AttributeOrders MapLinhaParaObjeto(string linha)
         {
             var obj = new AttributeOrders();
+            Console.WriteLine(linha.Length); 
 
-            foreach (var prop in typeof(AttributeOrders).GetProperties())
+             foreach (var prop in typeof(AttributeOrders).GetProperties())
             {
                 var inicio = (int)GetPropertyAttributes(prop.Name, 0);
                 var tamanho = (int)GetPropertyAttributes(prop.Name, 1);
-                var valor = linha.Substring(inicio, tamanho).Trim();
+
+                if (linha.Length < inicio + tamanho)
+                    throw new ArgumentOutOfRangeException(nameof(linha), $"A linha não tem caracteres suficientes. Esperado: {inicio + tamanho}, Atual: {linha.Length}");
+
+                var valor = linha.Length >= inicio + tamanho
+                            ? linha.Substring(inicio, tamanho).Trim()
+                            : string.Empty;
+
                 prop.SetValue(obj, valor);
             }
 
             return obj;
         }
+
     }
 
     public class Layout : Attribute
     {
-        public Layout(int tamanho, int inicio)
+        public Layout(int inicio, int tamanho)
         {
-            this.tamanho = tamanho;
             this.inicio = inicio;
-
+            this.tamanho = tamanho;
         }
-        public int tamanho { get; set; }
-        public int inicio { get; set; }
 
+        public int inicio { get; set; }
+        public int tamanho { get; set; }
     }
+
 }

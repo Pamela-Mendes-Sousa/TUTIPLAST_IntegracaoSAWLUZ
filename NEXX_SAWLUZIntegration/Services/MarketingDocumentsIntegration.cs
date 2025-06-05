@@ -11,6 +11,7 @@ using NEXX_SAWLUZIntegration.Utils;
 using Newtonsoft.Json;
 using System.Globalization;
 using System.Collections.Concurrent;
+using System.Drawing;
 
 namespace NEXX_SAWLUZIntegration.Services
 {
@@ -73,16 +74,43 @@ namespace NEXX_SAWLUZIntegration.Services
                     {
                         var resultados = await Task.WhenAll(grupo.Select(async pedido =>
                         {
+                            var sapObject = new MarketingDocuments();
                             try
                             {
-                                var sapObject = MapOrdersFields(pedido);
+                                sapObject = MapOrdersFields(pedido);
                                 var response = await _serviceLayerClient.PostAsync<MarketingDocuments>("Orders", sapObject);
                                 _logger.LogInformation($"Pedido {pedido.PedidoNro} enviado com sucesso!");
+                                NEXX_LOG log = new NEXX_LOG()
+                                {
+                                    NEXX_IdDoc = pedido.PedidoNro,
+                                    NEXX_TipoDoc = "PedidoVendas",
+                                    NEXX_Status = "2",
+                                    NEXX_MsgRet = $"Pedido de vendas criado no SAP com sucesso",
+                                    NEXX_IdDocLeg = response.DocEntry.ToString(),
+                                    NEXX_JsonEnv = sapObject,
+                                    NEXX_JsonRet = response,
+                                    NEXX_IdRet = path
+                                };
+                                await log.InsertOrUpdateLog(_dbQueryExecutor);
+
                                 return true;
                             }
                             catch (Exception ex)
                             {
                                 _logger.LogError(ex, $"Erro ao enviar pedido {pedido.PedidoNro}: {ex.Message}");
+
+                                NEXX_LOG log = new NEXX_LOG()
+                                {
+                                    NEXX_IdDoc = pedido.PedidoNro,
+                                    NEXX_TipoDoc = "PedidoVendas",
+                                    NEXX_Status = "3",
+                                    NEXX_MsgRet = $"Erro ao criar Pedido de vendas : {ex.Message}",
+                                    NEXX_JsonEnv = sapObject,
+                                    NEXX_JsonRet = ex.ToString(),
+                                    NEXX_IdRet = path
+                                };
+                                await log.InsertOrUpdateLog(_dbQueryExecutor);
+
                                 return false;
                             }
                         }));
@@ -108,6 +136,16 @@ namespace NEXX_SAWLUZIntegration.Services
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, $"Erro ao processar o arquivo {path}");
+                    NEXX_LOG log = new NEXX_LOG()
+                    {
+                        NEXX_IdDoc = path,
+                        NEXX_TipoDoc = "PedidoVendas",
+                        NEXX_Status = "3",
+                        NEXX_MsgRet = $"Erro ao processar o arquivo {path}",
+                        NEXX_JsonRet = ex.ToString(),
+                    };
+                    await log.InsertOrUpdateLog(_dbQueryExecutor);
+
                 }
 
             }));
@@ -120,10 +158,24 @@ namespace NEXX_SAWLUZIntegration.Services
             marketingDocument = new MarketingDocuments
             {
                 CardCode = pedido.Orders.FirstOrDefault()?.ClienteInterno,
+                TaxDate = DateTime.ParseExact(pedido.Orders.FirstOrDefault()?.UE_DtHrEmissao, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("yyyy-MM-dd"),
+                DocDate = DateTime.Now.ToString("yyyy-MM-dd"),
+                U_IdPrograma = pedido.Orders.FirstOrDefault()?.IdPrograma,
                 DocumentLines = pedido.Orders.Select(x => new MarketingDocuments.Documentline
                 {
                     ItemCode = x.ProdutoLocal,
-                    Quantity = Convert.ToDouble(x.Quantidade, CultureInfo.InvariantCulture),
+                    Quantity = 
+                        Convert.ToDouble($"{x.Quantidade.Substring(0, x.Quantidade.Length - 3)}.{x.Quantidade.Substring(x.Quantidade.Length - 3, 3)}", 
+                                        CultureInfo.InvariantCulture),
+                    VendorNum = x.ProdutoCliente,
+                    SupplierCatNum = x.ProdutoCliente,
+                    ShipDate = x.DtHrDE != null ? DateTime.ParseExact(x.DtHrDE, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("yyyy-MM-dd") : "",
+                    U_Fabrica = x.Fabrica,
+                    U_PV_PedC = x.PedidoNro,
+                    U_Local_PE = x.Local_PE,
+                    U_TipoFornec = x.TipoFornecimento,
+                    U_CallDelivery = x.CallDelivery,
+                    U_UE_Serie = x.UE_Serie
                 }).ToList()
             };
 

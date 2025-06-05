@@ -57,9 +57,6 @@ namespace NEXX_SAWLUZIntegration
                         Console.WriteLine($@"Iniciando Rotina");
                         _logger.LogInformation("Iniciando Rotina");
 
-
-                        var tasks = new List<Task>();
-
                         //PEDIDO VENDAS
                         var pathIn = AppConfig.Configuration["PATH_IN"];
                         var pathLanc = AppConfig.Configuration["PATH_LANCADO"];
@@ -67,9 +64,8 @@ namespace NEXX_SAWLUZIntegration
                         string[] inarqTxt = Directory.GetFiles(pathIn, $@"*.txt");
 
                         var marketingDocumentsIntegration = new MarketingDocumentsIntegration(_loggerMKT, _dbQueryExecutor, _serviceLayerClient);
-                        tasks.Add(marketingDocumentsIntegration.ProcessFileAsync(inarqTxt.ToList(), pathLanc));
+                        await marketingDocumentsIntegration.ProcessFileAsync(inarqTxt.ToList(), pathLanc);
 
-                        await Task.WhenAll(tasks);
                     }
                     catch (Exception ex)
                     {
