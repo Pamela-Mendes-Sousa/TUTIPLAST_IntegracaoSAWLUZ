@@ -12,6 +12,9 @@ using Nexx.Core.ServiceLayer.Setup.Interfaces;
 using Nexx.Core.ODBC.Connections;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Text.Json;
+using Nexx.Core.ODBC.Helpers;
+using static NEXX_SAWLUZIntegration.Services.MarketingDocumentsIntegration;
 
 namespace NEXX_SAWLUZIntegration
 {
@@ -37,16 +40,16 @@ namespace NEXX_SAWLUZIntegration
                 var _serviceLayerClient = scope.ServiceProvider.GetRequiredService<IServiceLayerClient>();
 
                 #region Cria Campos e Tabelas
-                //var services = scope.ServiceProvider;
-                //var tableService = services.GetRequiredService<IIntegrationTableService>();
-                //var fieldService = services.GetRequiredService<IIntegrationFieldService>();
-                //var objectService = services.GetRequiredService<IIntegrationObjectService>();
+                var services = scope.ServiceProvider;
+                var tableService = services.GetRequiredService<IIntegrationTableService>();
+                var fieldService = services.GetRequiredService<IIntegrationFieldService>();
+                var objectService = services.GetRequiredService<IIntegrationObjectService>();
 
-                //var schemaPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DataBase\\JSON\\SMA_TablesFields.json");
+                var schemaPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DataBase\\JSON\\SMA_TablesFields.json");
 
-                //await tableService.CreateTablesAsync(schemaPath);
-                //await fieldService.CreateFieldsAsync(schemaPath);
-                //await objectService.CreateObjectsAsync(schemaPath);
+                await tableService.CreateTablesAsync(schemaPath);
+                await fieldService.CreateFieldsAsync(schemaPath);
+                await objectService.CreateObjectsAsync(schemaPath);
                 #endregion
 
 

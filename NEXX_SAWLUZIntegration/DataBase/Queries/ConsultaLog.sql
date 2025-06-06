@@ -25,5 +25,5 @@ WHERE
 	T0."Name" = 'NEXX_SAWLUZIntegration'
 	AND T0."U_NEXX_TipoDoc" = 'PedidoVendas'
 AND "UpdateDate" >= [%0]  AND  "UpdateDate" <= [%1]
-AND (T0."U_NEXX_Status" = '[%2]' OR '[%2]'= '')
+AND (T0."U_NEXX_Status" = '[%2]' OR '[%2]'= '');
 

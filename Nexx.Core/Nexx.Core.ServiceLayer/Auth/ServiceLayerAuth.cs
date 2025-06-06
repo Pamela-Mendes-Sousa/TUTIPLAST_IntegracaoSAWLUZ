@@ -30,7 +30,6 @@ public class ServiceLayerAuth : IServiceLayerAuth
         await _lock.WaitAsync();
         try
         {
-            
             if (!string.IsNullOrEmpty(_sessionId) && _expiresAt > DateTime.UtcNow)
             {
                 return (_sessionId, _routeId!);
@@ -83,26 +82,30 @@ public class ServiceLayerAuth : IServiceLayerAuth
 
     public HttpClient GetAuthenticatedClient()
     {
-        if (string.IsNullOrEmpty(_sessionId) || DateTime.UtcNow > _expiresAt)
-            throw new InvalidOperationException("Sessão inválida. Chame GetSessionAsync() antes.");
-
-        _httpClient.DefaultRequestHeaders.Remove("Cookie");
-        _httpClient.DefaultRequestHeaders.Add("Cookie", $"B1SESSION={_sessionId}; ROUTEID={_routeId}");
-
-        return _httpClient;
+        // Sincroniza o acesso à sessão e força renovação se necessário
+        var task = Task.Run(async () => await GetAuthenticatedClientAsync());
+        return task.GetAwaiter().GetResult();
     }
 
     public async Task<HttpClient> GetAuthenticatedClientAsync()
     {
         var (sessionId, routeId) = await GetSessionAsync();
 
-        _httpClient.DefaultRequestHeaders.Remove("Cookie");
-        var cookieHeader = $"B1SESSION={sessionId}";
-        if (!string.IsNullOrEmpty(routeId))
-            cookieHeader += $"; ROUTEID={routeId}";
-        _httpClient.DefaultRequestHeaders.Add("Cookie", cookieHeader);
+        await _lock.WaitAsync();
+        try
+        {
+            _httpClient.DefaultRequestHeaders.Remove("Cookie");
+            var cookieHeader = $"B1SESSION={sessionId}";
+            if (!string.IsNullOrEmpty(routeId))
+                cookieHeader += $"; ROUTEID={routeId}";
+            _httpClient.DefaultRequestHeaders.Add("Cookie", cookieHeader);
 
-        return _httpClient;
+            return _httpClient;
+        }
+        finally
+        {
+            _lock.Release();
+        }
     }
 
     private static string ExtractCookieValue(List<string> cookies, string name)

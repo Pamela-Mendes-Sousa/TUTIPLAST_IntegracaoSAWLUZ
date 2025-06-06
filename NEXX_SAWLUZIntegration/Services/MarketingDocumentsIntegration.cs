@@ -70,6 +70,8 @@ namespace NEXX_SAWLUZIntegration.Services
 
                     var sucessoTotal = true;
 
+                    var bpl = Convert.ToInt32(AppConfig.Configuration["Filial"]);
+
                     foreach (var grupo in grupos)
                     {
                         var resultados = await Task.WhenAll(grupo.Select(async pedido =>
@@ -77,7 +79,7 @@ namespace NEXX_SAWLUZIntegration.Services
                             var sapObject = new MarketingDocuments();
                             try
                             {
-                                sapObject = MapOrdersFields(pedido);
+                                sapObject = MapOrdersFields(pedido, bpl);
                                 var response = await _serviceLayerClient.PostAsync<MarketingDocuments>("Orders", sapObject);
                                 _logger.LogInformation($"Pedido {pedido.PedidoNro} enviado com sucesso!");
                                 NEXX_LOG log = new NEXX_LOG()
@@ -86,7 +88,7 @@ namespace NEXX_SAWLUZIntegration.Services
                                     NEXX_TipoDoc = "PedidoVendas",
                                     NEXX_Status = "2",
                                     NEXX_MsgRet = $"Pedido de vendas criado no SAP com sucesso",
-                                    NEXX_IdDocLeg = response.DocEntry.ToString(),
+                                    NEXX_IdDocLeg = response.DocNum.ToString(),
                                     NEXX_JsonEnv = sapObject,
                                     NEXX_JsonRet = response,
                                     NEXX_IdRet = path
@@ -151,8 +153,9 @@ namespace NEXX_SAWLUZIntegration.Services
             }));
         }
 
-        private MarketingDocuments MapOrdersFields(ListAttributeOrders pedido)
+        private MarketingDocuments MapOrdersFields(ListAttributeOrders pedido, int bpl)
         {
+
             var marketingDocument = new MarketingDocuments();
 
             marketingDocument = new MarketingDocuments
@@ -160,7 +163,9 @@ namespace NEXX_SAWLUZIntegration.Services
                 CardCode = pedido.Orders.FirstOrDefault()?.ClienteInterno,
                 TaxDate = DateTime.ParseExact(pedido.Orders.FirstOrDefault()?.UE_DtHrEmissao, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("yyyy-MM-dd"),
                 DocDate = DateTime.Now.ToString("yyyy-MM-dd"),
+                DocDueDate = DateTime.Now.ToString("yyyy-MM-dd"),
                 U_IdPrograma = pedido.Orders.FirstOrDefault()?.IdPrograma,
+                BPL_IDAssignedToInvoice = bpl,
                 DocumentLines = pedido.Orders.Select(x => new MarketingDocuments.Documentline
                 {
                     ItemCode = x.ProdutoLocal,

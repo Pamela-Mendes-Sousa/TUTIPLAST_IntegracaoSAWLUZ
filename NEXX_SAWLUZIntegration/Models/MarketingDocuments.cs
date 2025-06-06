@@ -12,9 +12,11 @@ namespace NEXX_SAWLUZIntegration.Models
     public class MarketingDocuments
     {
         public int? DocEntry { get; set; }
+        public int? BPL_IDAssignedToInvoice { get; set; }
         public int? DocNum { get; set; }
         public string DocType { get; set; }
         public string DocDate { get; set; }
+        public string DocDueDate { get; set; }
         public string TaxDate { get; set; }
         public string CardCode { get; set; }
         public string U_IdPrograma { get; set; }
