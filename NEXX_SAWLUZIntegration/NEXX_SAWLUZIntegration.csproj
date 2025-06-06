@@ -39,6 +39,9 @@
   
 
   <ItemGroup>
+    <None Update="DataBase\Queries\ConsultaLog.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="DataBase\Queries\FindPedidoVenda.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
