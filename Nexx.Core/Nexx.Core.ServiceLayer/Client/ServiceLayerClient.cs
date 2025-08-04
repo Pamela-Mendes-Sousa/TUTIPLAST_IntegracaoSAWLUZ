@@ -44,9 +44,9 @@ namespace Nexx.Core.ServiceLayer.Client
             return await DeserializeResponseAsync<T>(response, endpoint);
         }
 
-        public async Task<T> PatchAsync<T>(string endpoint, object payload)
+        public async Task<T> PatchAsync<T>(string endpoint, object payload, bool replaceCollectionsOnPatch = false)
         {
-            var response = await SendRequestAsync(HttpMethod.Patch, endpoint, payload);
+            var response = await SendRequestAsync(HttpMethod.Patch, endpoint, payload, replaceCollectionsOnPatch);
 
             return await DeserializeResponseAsync<T>(response, endpoint);
         }
@@ -66,20 +66,26 @@ namespace Nexx.Core.ServiceLayer.Client
         public async Task<HttpResponseMessage> PostRawAsync(string endpoint, object payload)
             => await SendRequestAsync(HttpMethod.Post, endpoint, payload);
 
-        public async Task<HttpResponseMessage> PatchRawAsync(string endpoint, object payload)
-            => await SendRequestAsync(HttpMethod.Patch, endpoint, payload);
+        public async Task<HttpResponseMessage> PatchRawAsync(string endpoint, object payload, bool replaceCollectionsOnPatch = false)
+            => await SendRequestAsync(HttpMethod.Patch, endpoint, payload, replaceCollectionsOnPatch);
 
         public async Task<HttpResponseMessage> DeleteRawAsync(string endpoint)
             => await SendRequestAsync(HttpMethod.Delete, endpoint);
 
         // ==================== Internos Auxiliares ====================
 
-        private async Task<HttpResponseMessage> SendRequestAsync(HttpMethod method, string endpoint, object? payload = null)
+        private async Task<HttpResponseMessage> SendRequestAsync(HttpMethod method, string endpoint, object? payload = null,
+    bool replaceCollectionsOnPatch = false)
         {
             var client = await _auth.GetAuthenticatedClientAsync();
             _log.LogInfo($"{method.Method} -> {endpoint}");
 
             var request = new HttpRequestMessage(method, endpoint);
+            
+            if (method == HttpMethod.Patch && replaceCollectionsOnPatch)
+            {
+                request.Headers.Add("B1S-ReplaceCollectionsOnPatch", "true");
+            }
 
             if (payload != null)
             {
@@ -88,6 +94,7 @@ namespace Nexx.Core.ServiceLayer.Client
 
                 request.Content = new StringContent(payloadJson, Encoding.UTF8, "application/json");
             }
+
             var response = await client.SendAsync(request);
             return response;
         }

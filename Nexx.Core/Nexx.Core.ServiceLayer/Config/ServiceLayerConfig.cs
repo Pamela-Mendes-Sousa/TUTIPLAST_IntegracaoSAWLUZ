@@ -6,4 +6,5 @@ public class ServiceLayerConfig
     public string CompanyDB { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
+    public string Language { get; set; } = string.Empty;
 }

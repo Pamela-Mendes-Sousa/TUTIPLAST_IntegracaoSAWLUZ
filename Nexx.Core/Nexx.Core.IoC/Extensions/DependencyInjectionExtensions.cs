@@ -46,6 +46,7 @@ public static class DependencyInjectionExtensions
         {
             client.BaseAddress = new Uri(slConfig.Url);
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            client.Timeout = TimeSpan.FromMinutes(30);
         })
        .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
        {

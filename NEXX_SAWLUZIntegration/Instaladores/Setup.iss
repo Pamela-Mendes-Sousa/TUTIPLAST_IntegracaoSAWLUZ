@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "NEXX_SAWLUZIntegration"
-#define MyAppVersion "1.0.0.0"
+#define MyAppVersion "1.0.0.2"
 #define MyAppPublisher "NEXX_SAWLUZIntegration"
 #define MyAppURL ""
 #define MyServiceName "NEXX_SAWLUZIntegration"  

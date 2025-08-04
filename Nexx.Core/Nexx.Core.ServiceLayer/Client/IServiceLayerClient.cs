@@ -33,7 +33,7 @@ namespace Nexx.Core.ServiceLayer.Client
         /// <param name="endpoint">Endpoint relativo no Service Layer.</param>
         /// <param name="payload">Objeto a ser enviado como corpo da requisição.</param>
         /// <returns>Objeto desserializado da resposta.</returns>
-        Task<T> PatchAsync<T>(string endpoint, object payload);
+        Task<T> PatchAsync<T>(string endpoint, object payload, bool replaceCollectionsOnPatch = false);
 
         /// <summary>
         /// Executa uma requisição DELETE no endpoint informado.
@@ -62,7 +62,7 @@ namespace Nexx.Core.ServiceLayer.Client
         /// <param name="endpoint">Endpoint relativo no Service Layer.</param>
         /// <param name="payload">Objeto a ser enviado como corpo da requisição.</param>
         /// <returns>Resposta HTTP bruta.</returns>
-        Task<HttpResponseMessage> PatchRawAsync(string endpoint, object payload);
+        Task<HttpResponseMessage> PatchRawAsync(string endpoint, object payload, bool replaceCollectionsOnPatch = false);
 
         /// <summary>
         /// Executa uma requisição DELETE retornando a resposta bruta (HttpResponseMessage).

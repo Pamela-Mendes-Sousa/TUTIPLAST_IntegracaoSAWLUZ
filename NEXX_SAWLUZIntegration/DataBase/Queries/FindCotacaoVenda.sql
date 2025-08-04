@@ -1,0 +1,7 @@
+﻿SELECT IFNULL(MAX(OQUT."DocEntry"),0) "DocEntry", IFNULL(MAX(OQUT."DocNum"),0) "DocNum"
+FROM 
+	QUT1 
+	INNER JOIN OQUT ON QUT1."DocEntry" = OQUT."DocEntry"
+WHERE 
+	TO_VARCHAR("U_PV_PedC") = '{0}'
+	AND OQUT."CANCELED" = 'N'

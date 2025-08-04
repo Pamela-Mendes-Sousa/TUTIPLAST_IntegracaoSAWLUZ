@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -33,13 +33,15 @@
   
 
   <ItemGroup>
-    <Folder Include="Documents\" />
     <Folder Include="Instaladores\" />
   </ItemGroup>
   
 
   <ItemGroup>
     <None Update="DataBase\Queries\ConsultaLog.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataBase\Queries\FindCotacaoVenda.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="DataBase\Queries\FindPedidoVenda.sql">

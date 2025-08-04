@@ -36,6 +36,7 @@ namespace NEXX_SAWLUZIntegration.Models
             public string U_TipoFornec { get; set; }
             public string U_CallDelivery { get; set; }
             public string U_UE_Serie { get; set; }
+            public string U_Doca_PE { get; set; }
         }
 
     }

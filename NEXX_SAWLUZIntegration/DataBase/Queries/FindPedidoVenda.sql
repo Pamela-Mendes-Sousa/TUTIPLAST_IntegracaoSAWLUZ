@@ -1,1 +1,7 @@
-﻿SELECT COUNT(*) FROM RDR1 WHERE "DocEntry" = '{0}'--TO_VARCHAR("U_PV_PedC") = '{0}'
+﻿SELECT IFNULL(MAX(ORDR."DocEntry"),0) "DocEntry", IFNULL(MAX(ORDR."DocNum"),0) "DocNum"
+FROM 
+	RDR1 
+	INNER JOIN ORDR ON RDR1."DocEntry" = ORDR."DocEntry"
+WHERE 
+	TO_VARCHAR("U_PV_PedC") = '{0}'
+	AND ORDR."CANCELED" = 'N'

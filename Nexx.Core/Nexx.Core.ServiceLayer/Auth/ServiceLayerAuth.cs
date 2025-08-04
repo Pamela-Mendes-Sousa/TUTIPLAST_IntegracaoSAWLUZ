@@ -41,7 +41,8 @@ public class ServiceLayerAuth : IServiceLayerAuth
             {
                 CompanyDB = _config.CompanyDB,
                 UserName = _config.UserName,
-                Password = _config.Password
+                Password = _config.Password,
+                Language = 29 // Português do Brasil
             };
 
             var requestContent = new StringContent(JsonSerializer.Serialize(loginBody), Encoding.UTF8, "application/json");
@@ -71,6 +72,7 @@ public class ServiceLayerAuth : IServiceLayerAuth
             _expiresAt = DateTime.UtcNow.AddMinutes(25); // Sessão padrão ~30 min, margem de segurança
 
             _log.LogInfo("Sessão autenticada com sucesso no Service Layer.");
+
             return (_sessionId, _routeId!);
 
         }
@@ -99,7 +101,6 @@ public class ServiceLayerAuth : IServiceLayerAuth
             if (!string.IsNullOrEmpty(routeId))
                 cookieHeader += $"; ROUTEID={routeId}";
             _httpClient.DefaultRequestHeaders.Add("Cookie", cookieHeader);
-
             return _httpClient;
         }
         finally

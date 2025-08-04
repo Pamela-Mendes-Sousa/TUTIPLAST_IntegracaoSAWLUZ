@@ -1,5 +1,6 @@
 using Nexx.Core.ServiceLayer.Setup.Interfaces;
 using NEXX_SAWLUZIntegration;
+using NEXX_SAWLUZIntegration.Services;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -7,6 +8,8 @@ IHost host = Host.CreateDefaultBuilder(args)
    {
        services.AddHostedService<Worker>();
        services.AddNexxCore(context.Configuration); // Pass the required 'configuration' parameter  
+       services.AddScoped<MarketingDocumentsIntegration>();
+
 
    })
    .Build();

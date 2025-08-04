@@ -38,6 +38,7 @@ namespace NEXX_SAWLUZIntegration
 
                 var _dbQueryExecutor = scope.ServiceProvider.GetRequiredService<IDbQueryExecutor>();
                 var _serviceLayerClient = scope.ServiceProvider.GetRequiredService<IServiceLayerClient>();
+                var _marketingDocuments = scope.ServiceProvider.GetRequiredService<MarketingDocumentsIntegration>();
 
                 #region Cria Campos e Tabelas
                 var services = scope.ServiceProvider;
@@ -66,8 +67,7 @@ namespace NEXX_SAWLUZIntegration
 
                         string[] inarqTxt = Directory.GetFiles(pathIn, $@"*.txt");
 
-                        var marketingDocumentsIntegration = new MarketingDocumentsIntegration(_loggerMKT, _dbQueryExecutor, _serviceLayerClient);
-                        await marketingDocumentsIntegration.ProcessFileAsync(inarqTxt.ToList(), pathLanc);
+                        await _marketingDocuments.ProcessFileAsync(inarqTxt.ToList(), pathLanc);
 
                     }
                     catch (Exception ex)
