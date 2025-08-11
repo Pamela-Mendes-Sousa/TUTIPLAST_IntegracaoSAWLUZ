@@ -102,7 +102,7 @@ namespace NEXX_SAWLUZIntegration.Services
             }));
         }
 
-        private MarketingDocuments MapOrdersFields(ListAttributeOrders pedido, int bpl)
+        private MarketingDocuments MapOrdersFields(ListAttributeOrders pedido, int bpl, bool isUpdate = false)
         {
 
             var marketingDocument = new MarketingDocuments();
@@ -116,10 +116,13 @@ namespace NEXX_SAWLUZIntegration.Services
             {
                 CardCode = pedido.Orders.FirstOrDefault()?.ClienteInterno,
                 TaxDate = DateTime.ParseExact(pedido.Orders.FirstOrDefault()?.UE_DtHrEmissao, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("yyyy-MM-dd"),
-                DocDate = DateTime.Now.ToString("yyyy-MM-dd"),
-                DocDueDate = DateTime.Now.ToString("yyyy-MM-dd"),
+                //DocDate = DateTime.Now.ToString("yyyy-MM-dd"),
+                DocDate = isUpdate ? (string?)null : DateTime.Now.ToString("yyyy-MM-dd"),
+                //DocDueDate = DateTime.Now.ToString("yyyy-MM-dd"),
+                DocDueDate = isUpdate ? (string?)null : DateTime.Now.ToString("yyyy-MM-dd"),
                 U_IdPrograma = pedido.Orders.FirstOrDefault()?.IdPrograma,
-                BPL_IDAssignedToInvoice = bpl,
+                //BPL_IDAssignedToInvoice = bpl,
+                BPL_IDAssignedToInvoice = isUpdate ? (int?)null : bpl,
                 DocumentLines = pedido.Orders.Select(x => new MarketingDocuments.Documentline
                 {
                     ItemCode = x.ProdutoLocal,
@@ -141,6 +144,77 @@ namespace NEXX_SAWLUZIntegration.Services
 
             return marketingDocument;
         }
+
+        private MarketingDocuments MapOrdersFields_Não_Usar(ListAttributeOrders pedido, int bpl, bool isUpdate = false)
+        {
+            var marketingDocument = new MarketingDocuments
+            {
+                CardCode = pedido.Orders.FirstOrDefault()?.ClienteInterno,
+                TaxDate = DateTime.ParseExact(pedido.Orders.FirstOrDefault()?.UE_DtHrEmissao, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("yyyy-MM-dd"),
+                DocDate = DateTime.Now.ToString("yyyy-MM-dd"),
+                DocDueDate = DateTime.Now.ToString("yyyy-MM-dd"),
+                U_IdPrograma = pedido.Orders.FirstOrDefault()?.IdPrograma,
+                BPL_IDAssignedToInvoice = isUpdate ? (int?)null : bpl,
+                DocumentLines = new List<MarketingDocuments.Documentline>()
+            };
+
+            foreach (var x in pedido.Orders)
+            {
+                if (!IsItemActiveAsync(x.ProdutoLocal).Result)
+                {
+                    _logger.LogWarning($"Item {x.ProdutoLocal} está inativo e foi ignorado.");
+                    continue;
+                }
+
+                double quantidade = Convert.ToDouble(
+                    $"{x.Quantidade.Substring(0, x.Quantidade.Length - 3)}.{x.Quantidade.Substring(x.Quantidade.Length - 3, 3)}",
+                    CultureInfo.InvariantCulture
+                );
+
+                var linha = new MarketingDocuments.Documentline
+                {
+                    ItemCode = x.ProdutoLocal,
+                    Quantity = quantidade,
+                    VendorNum = x.ProdutoCliente,
+                    SupplierCatNum = x.ProdutoCliente,
+                    ShipDate = x.DtHrDE != null
+                        ? DateTime.ParseExact(x.DtHrDE, "yyyyMMdd HHmmss", CultureInfo.InvariantCulture).ToString("yyyy-MM-dd")
+                        : "",
+                    U_Fabrica = x.Fabrica,
+                    U_PV_PedC = x.PedidoNro,
+                    U_Local_PE = x.Local_PE,
+                    U_TipoFornec = x.TipoFornecimento,
+                    U_CallDelivery = x.CallDelivery,
+                    U_UE_Serie = x.UE_Serie,
+                    U_Doca_PE = x.Doca_PE
+                };
+
+                marketingDocument.DocumentLines.Add(linha);
+            }
+
+            return marketingDocument;
+        }
+
+        private async Task<bool> IsItemActiveAsync(string itemCode)
+        {
+            try
+            {
+                _logger.LogInformation($"Verificando status do item '{itemCode}' no SAP");
+
+                string query = $@" SELECT ""validFor"" FROM OITM WHERE ""ItemCode"" = @ItemCode ";
+
+                var parameters = new Dictionary<string, object> { { "@ItemCode", itemCode } };
+                var result = await _dbQueryExecutor.ExecuteQueryAsync<QueryItemStatus>(query, parameters);
+                if (result != null && result.Any()) { return result.First().validFor == "Y"; }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Erro ao verificar se o item {itemCode} está ativo");
+                return false;
+            }
+        }
+
 
         private async Task<QueryOrderExists> OrderExists(string pedidoNro, string tipodoc)
         {
@@ -233,7 +307,7 @@ namespace NEXX_SAWLUZIntegration.Services
             var tipoDoc = pedido.TipoDoc == "PE" ? "CotacaoVendas" : "PedidoVendas";
             try
             {
-                sapObject = MapOrdersFields(pedido, bpl);
+                sapObject = MapOrdersFields(pedido, bpl, true);
 
                 var endPoint = pedido.TipoDoc == "PE" ? "Quotations" : "Orders";
                 await _serviceLayerClient.PatchAsync<MarketingDocuments>($"{endPoint}({docEntry})", sapObject, replaceCollectionsOnPatch: true);
@@ -284,6 +358,11 @@ namespace NEXX_SAWLUZIntegration.Services
         {
             public int DocEntry { get; set; }
             public int DocNum { get; set; }
+        }
+
+        public class QueryItemStatus
+        {
+            public string validFor { get; set; }
         }
     }
 }
