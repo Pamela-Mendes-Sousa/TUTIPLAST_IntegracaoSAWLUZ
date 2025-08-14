@@ -5,3 +5,4 @@ FROM
 WHERE 
 	ORDR."CANCELED" = 'N'
 	AND TO_VARCHAR("U_CallDelivery") in ({0})
+	AND ORDR."DocStatus" = 'O'
