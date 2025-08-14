@@ -3,5 +3,7 @@ FROM
 	QUT1 
 	INNER JOIN OQUT ON QUT1."DocEntry" = OQUT."DocEntry"
 WHERE 
-	TO_VARCHAR("U_PV_PedC") = '{0}'
-	AND OQUT."CANCELED" = 'N'
+	OQUT."DocDate" between TO_DATE(YEAR(CURRENT_DATE)||'-'||MONTH(CURRENT_DATE)||'-01') and 
+		add_days(Add_MONTHs(TO_DATE(YEAR(CURRENT_DATE)||'-'||MONTH(CURRENT_DATE)||'-01'),1),-1)
+	and OQUT."CANCELED" = 'N'
+	AND OQUT."DocStatus" = 'O'

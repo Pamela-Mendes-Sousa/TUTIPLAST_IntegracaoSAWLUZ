@@ -54,18 +54,27 @@ namespace NEXX_SAWLUZIntegration.Services
                     int erro = 0;
                     foreach (var pedido in tipoDocAgrupados.Where(x => !string.IsNullOrEmpty(x.TipoDoc)))
                     {
-                        _logger.LogInformation($"Validando. Pedido {pedido.Orders.FirstOrDefault().PedidoNro}");
-                        var ret = await OrderExists(pedido.Orders.FirstOrDefault().PedidoNro, pedido.TipoDoc);
+                        _logger.LogInformation($"Validando. Pedido {pedido.Orders.FirstOrDefault().CallDelivery}");
+
+                        //cria uma lista de todos os CallDelivery dentro do pedido.Orders q são diferentes de JIT
+                        var lstCallDel = pedido.Orders
+                            .Where(x => !string.IsNullOrEmpty(x.CallDelivery) && x.CallDelivery != "JIT")
+                            .Select(x => x.CallDelivery)
+                            .Distinct()
+                            .ToList();
+
+                        var ret = await OrderExists(lstCallDel, pedido.TipoDoc);
                         if (ret.DocEntry == 0)
                         {
-                            _logger.LogInformation($"Pedido {pedido.Orders.FirstOrDefault().PedidoNro} nao existe, realizando inserção");
+                            _logger.LogInformation($"Pedido {JsonConvert.SerializeObject(lstCallDel)} nao existe, realizando inserção");
                             if (!await CreateDocument(pedido, path))
                                 erro++;
                         }
                         else
                         {
                             //.ACHEI UM DOC QUE POSSUI AQUELE NUMERO DE PEDIDO E SUBSTITUI TODAS AS LINHAS
-                            _logger.LogInformation($"Pedido {pedido.Orders.FirstOrDefault().PedidoNro} DocEntry {ret.DocEntry} e DocNum {ret.DocNum}já foi enviado anteriormente. Atualizando.");
+                            _logger.LogInformation($"Pedido {JsonConvert.SerializeObject(lstCallDel)} DocEntry {ret.DocEntry} e DocNum {ret.DocNum}já foi enviado anteriormente. Atualizando.");
+                            
                             if (!await UpdateDocument(pedido, path, ret.DocEntry.ToString(), ret.DocNum.ToString()))
                                 erro++;
                         }
@@ -114,14 +123,11 @@ namespace NEXX_SAWLUZIntegration.Services
                                         CultureInfo.InvariantCulture);
             marketingDocument = new MarketingDocuments
             {
-                CardCode = pedido.Orders.FirstOrDefault()?.ClienteInterno,
+                CardCode = isUpdate ? (string?)null : pedido.Orders.FirstOrDefault()?.ClienteInterno,
                 TaxDate = DateTime.ParseExact(pedido.Orders.FirstOrDefault()?.UE_DtHrEmissao, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("yyyy-MM-dd"),
-                //DocDate = DateTime.Now.ToString("yyyy-MM-dd"),
                 DocDate = isUpdate ? (string?)null : DateTime.Now.ToString("yyyy-MM-dd"),
-                //DocDueDate = DateTime.Now.ToString("yyyy-MM-dd"),
                 DocDueDate = isUpdate ? (string?)null : DateTime.Now.ToString("yyyy-MM-dd"),
                 U_IdPrograma = pedido.Orders.FirstOrDefault()?.IdPrograma,
-                //BPL_IDAssignedToInvoice = bpl,
                 BPL_IDAssignedToInvoice = isUpdate ? (int?)null : bpl,
                 DocumentLines = pedido.Orders.Select(x => new MarketingDocuments.Documentline
                 {
@@ -216,20 +222,28 @@ namespace NEXX_SAWLUZIntegration.Services
         }
 
 
-        private async Task<QueryOrderExists> OrderExists(string pedidoNro, string tipodoc)
+        private async Task<QueryOrderExists> OrderExists(List<string> callDelivery, string tipodoc)
         {
             try
             {
                 _logger.LogInformation($"Iniciando a busca dos Pedidos/Cotação {tipodoc} no SAP");
 
+                var pedido = new List<QueryOrderExists>();
+
                 string qr = string.Empty;
                 if (tipodoc == "PE")
                 {
                     qr = await SqlQueryLoader.LoadAsync("FindCotacaoVenda.sql");
+                    var ret = await _dbQueryExecutor.ExecuteQueryAsync<QueryOrderExists>(qr);
+                    pedido = ret.ToList();
                 }
                 else if (tipodoc == "PD")
                 {
-                    qr = await SqlQueryLoader.LoadAsync("FindPedidoVenda.sql");
+                    var callDeliveryParam = string.Join(",", callDelivery.Select(cd => $"'{cd.Replace("'", "''")}'"));
+                    qr = string.Format(await SqlQueryLoader.LoadAsync("FindPedidoVenda.sql"), callDeliveryParam);
+
+                    var ret = await _dbQueryExecutor.ExecuteQueryAsync<QueryOrderExists>(qr);
+                    pedido = ret.ToList();
                 }
                 else
                 {
@@ -237,7 +251,6 @@ namespace NEXX_SAWLUZIntegration.Services
                     return new QueryOrderExists();
                 }
 
-                var pedido = await _dbQueryExecutor.ExecuteQueryAsync<QueryOrderExists>(qr, pedidoNro);
 
                 if (pedido == null || pedido.Count() == 0)
                 {
@@ -263,10 +276,14 @@ namespace NEXX_SAWLUZIntegration.Services
             try
             {
                 var response = await _serviceLayerClient.PostAsync<MarketingDocuments>(pedido.TipoDoc == "PE" ? "Quotations" : "Orders", sapObject);
-                _logger.LogInformation($"Pedido {pedido.PedidoNro} enviado com sucesso!");
+                
+                _logger.LogInformation($"Pedido {(pedido.TipoDoc == "PE"
+                        ? $"{DateTime.Now.Month}/{DateTime.Now.Year}"
+                        : pedido.Orders.FirstOrDefault().CallDelivery)} enviado com sucesso!");
+                
                 NEXX_LOG log = new NEXX_LOG()
                 {
-                    NEXX_IdDoc = pedido.PedidoNro,
+                    NEXX_IdDoc = pedido.TipoDoc == "PE" ? $"{DateTime.Now.Month}/{DateTime.Now.Year}" : pedido.Orders.FirstOrDefault().CallDelivery,
                     NEXX_TipoDoc = tipoDoc,
                     NEXX_Status = "2",
                     NEXX_MsgRet = $"{tipoDoc} criado no SAP com sucesso",
@@ -281,11 +298,13 @@ namespace NEXX_SAWLUZIntegration.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Erro ao enviar pedido {pedido.PedidoNro}: {ex.Message}");
+                _logger.LogError(ex, $"Erro ao enviar pedido {(pedido.TipoDoc == "PE"
+                        ? $"{DateTime.Now.Month}/{DateTime.Now.Year}"
+                        : pedido.Orders.FirstOrDefault().CallDelivery)} : {ex.Message}");
 
                 NEXX_LOG log = new NEXX_LOG()
                 {
-                    NEXX_IdDoc = pedido.PedidoNro,
+                    NEXX_IdDoc = pedido.TipoDoc == "PE" ? $"{DateTime.Now.Month}/{DateTime.Now.Year}" : pedido.Orders.FirstOrDefault().CallDelivery,
                     NEXX_TipoDoc = tipoDoc,
                     NEXX_Status = "3",
                     NEXX_MsgRet = $"Erro ao criar {tipoDoc} : {ex.Message}",
@@ -311,10 +330,14 @@ namespace NEXX_SAWLUZIntegration.Services
 
                 var endPoint = pedido.TipoDoc == "PE" ? "Quotations" : "Orders";
                 await _serviceLayerClient.PatchAsync<MarketingDocuments>($"{endPoint}({docEntry})", sapObject, replaceCollectionsOnPatch: true);
-                _logger.LogInformation($"Pedido {pedido.PedidoNro} atualizado com sucesso!");
+                
+                _logger.LogInformation($"Pedido {(pedido.TipoDoc == "PE"
+                        ? $"{DateTime.Now.Month}/{DateTime.Now.Year}"
+                        : pedido.Orders.FirstOrDefault().CallDelivery)} atualizado com sucesso!");
+                
                 NEXX_LOG log = new NEXX_LOG()
                 {
-                    NEXX_IdDoc = pedido.PedidoNro,
+                    NEXX_IdDoc = pedido.TipoDoc == "PE" ? $"{DateTime.Now.Month}/{DateTime.Now.Year} - {docNum}" : pedido.Orders.FirstOrDefault().CallDelivery,
                     NEXX_TipoDoc = tipoDoc,
                     NEXX_Status = "2",
                     NEXX_MsgRet = $"{tipoDoc} atualizado no SAP com sucesso",
@@ -328,11 +351,14 @@ namespace NEXX_SAWLUZIntegration.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Erro ao atualizar pedido {pedido.PedidoNro}: {ex.Message}");
+                _logger.LogError(ex, $"Erro ao atualizar pedido " +
+                    $"{(pedido.TipoDoc == "PE" 
+                        ? $"{DateTime.Now.Month}/{DateTime.Now.Year}" 
+                        : pedido.Orders.FirstOrDefault().CallDelivery)} : {ex.Message}");
 
                 NEXX_LOG log = new NEXX_LOG()
                 {
-                    NEXX_IdDoc = pedido.PedidoNro,
+                    NEXX_IdDoc = pedido.TipoDoc == "PE" ? $"{DateTime.Now.Month}/{DateTime.Now.Year}" : pedido.Orders.FirstOrDefault().CallDelivery,
                     NEXX_TipoDoc = tipoDoc,
                     NEXX_Status = "3",
                     NEXX_MsgRet = $"Erro ao atualizar {tipoDoc} : {ex.Message}",

@@ -3,5 +3,5 @@ FROM
 	RDR1 
 	INNER JOIN ORDR ON RDR1."DocEntry" = ORDR."DocEntry"
 WHERE 
-	TO_VARCHAR("U_PV_PedC") = '{0}'
-	AND ORDR."CANCELED" = 'N'
+	ORDR."CANCELED" = 'N'
+	AND TO_VARCHAR("U_CallDelivery") in ({0})
