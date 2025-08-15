@@ -34,8 +34,7 @@ namespace NEXX_SAWLUZIntegration.Services
 
         public async Task ProcessFileAsync(List<string> arquivosTxt, string pathLanc)
         {
-            // Etapa 1: Processamento dos arquivos de forma paralela, mas com escopo isolado por arquivo
-            await Task.WhenAll(arquivosTxt.Select(async path =>
+            foreach (var path in arquivosTxt)
             {
                 try
                 {
@@ -74,7 +73,7 @@ namespace NEXX_SAWLUZIntegration.Services
                         {
                             //.ACHEI UM DOC QUE POSSUI AQUELE NUMERO DE PEDIDO E SUBSTITUI TODAS AS LINHAS
                             _logger.LogInformation($"Pedido {JsonConvert.SerializeObject(lstCallDel)} DocEntry {ret.DocEntry} e DocNum {ret.DocNum}já foi enviado anteriormente. Atualizando.");
-                            
+
                             if (!await UpdateDocument(pedido, path, ret.DocEntry.ToString(), ret.DocNum.ToString()))
                                 erro++;
                         }
@@ -107,8 +106,10 @@ namespace NEXX_SAWLUZIntegration.Services
                     await log.InsertOrUpdateLog(_dbQueryExecutor);
 
                 }
-
-            }));
+            }
+            //await Task.WhenAll(arquivosTxt.Select(async path =>
+            //{
+            //}));
         }
 
         private MarketingDocuments MapOrdersFields(ListAttributeOrders pedido, int bpl, bool isUpdate = false)

@@ -65,10 +65,11 @@ namespace NEXX_SAWLUZIntegration
                         var pathIn = AppConfig.Configuration["PATH_IN"];
                         var pathLanc = AppConfig.Configuration["PATH_LANCADO"];
 
-                        string[] inarqTxt = Directory.GetFiles(pathIn, $@"*.txt");
+                        string[] inarqTxt = Directory.GetFiles(pathIn, "*.txt")
+                                            .OrderBy(f => File.GetLastWriteTime(f)) // Ordena pela data de criação
+                                            .ToArray();
 
                         await _marketingDocuments.ProcessFileAsync(inarqTxt.ToList(), pathLanc);
-
                     }
                     catch (Exception ex)
                     {
