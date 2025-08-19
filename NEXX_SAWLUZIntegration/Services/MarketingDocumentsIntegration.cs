@@ -146,7 +146,13 @@ namespace NEXX_SAWLUZIntegration.Services
                     U_CallDelivery = x.CallDelivery,
                     U_UE_Serie = x.UE_Serie,
                     U_Doca_PE = x.Doca_PE
-                }).ToList()
+                }).ToList(),
+                TaxExtension = isUpdate ? null : new MarketingDocuments.Taxextension
+                {
+                    MainUsage = AppConfig.Configuration["Usage"] != null
+                        ? Convert.ToInt32(AppConfig.Configuration["Usage"])
+                        : (int?)null
+                }
             };
 
             return marketingDocument;

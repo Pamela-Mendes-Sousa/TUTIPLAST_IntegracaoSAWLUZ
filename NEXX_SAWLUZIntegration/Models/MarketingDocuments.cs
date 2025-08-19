@@ -22,6 +22,8 @@ namespace NEXX_SAWLUZIntegration.Models
         public string U_IdPrograma { get; set; }
 
         public List<Documentline> DocumentLines { get; set; }
+        public Taxextension TaxExtension { get; set; }
+
 
         public class Documentline
         {
@@ -37,6 +39,11 @@ namespace NEXX_SAWLUZIntegration.Models
             public string U_CallDelivery { get; set; }
             public string U_UE_Serie { get; set; }
             public string U_Doca_PE { get; set; }
+        }
+
+        public class Taxextension
+        {
+            public int? MainUsage { get; set; }
         }
 
     }
