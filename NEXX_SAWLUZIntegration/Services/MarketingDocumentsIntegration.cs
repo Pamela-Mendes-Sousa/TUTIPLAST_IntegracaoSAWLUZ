@@ -62,7 +62,9 @@ namespace NEXX_SAWLUZIntegration.Services
                             .Distinct()
                             .ToList();
 
-                        var ret = await OrderExists(lstCallDel, pedido.TipoDoc);
+                        
+
+                        var ret = await OrderExists(lstCallDel, pedido.TipoDoc, path);
                         if (ret.DocEntry == 0)
                         {
                             _logger.LogInformation($"Pedido {JsonConvert.SerializeObject(lstCallDel)} nao existe, realizando inserção");
@@ -71,11 +73,16 @@ namespace NEXX_SAWLUZIntegration.Services
                         }
                         else
                         {
-                            //.ACHEI UM DOC QUE POSSUI AQUELE NUMERO DE PEDIDO E SUBSTITUI TODAS AS LINHAS
-                            _logger.LogInformation($"Pedido {JsonConvert.SerializeObject(lstCallDel)} DocEntry {ret.DocEntry} e DocNum {ret.DocNum}já foi enviado anteriormente. Atualizando.");
-
-                            if (!await UpdateDocument(pedido, path, ret.DocEntry.ToString(), ret.DocNum.ToString()))
-                                erro++;
+                            if (pedido.TipoDoc == "PE")
+                            {
+                                _logger.LogInformation($"Cotacao {JsonConvert.SerializeObject(lstCallDel)} DocEntry {ret.DocEntry} e DocNum {ret.DocNum}já foi enviado anteriormente. Atualizando.");
+                                if (!await UpdateDocument(pedido, path, ret.DocEntry.ToString(), ret.DocNum.ToString()))
+                                    erro++;
+                            }
+                            else
+                            {
+                                _logger.LogInformation($"Pedido DocEntry {ret.DocEntry} e DocNum {ret.DocNum}já foi enviado anteriormente.");
+                            }
                         }
 
                     }
@@ -102,14 +109,13 @@ namespace NEXX_SAWLUZIntegration.Services
                         NEXX_Status = "3",
                         NEXX_MsgRet = $"Erro ao processar o arquivo {path}",
                         NEXX_JsonRet = ex.ToString(),
+                        NEXX_IdRet = path
                     };
                     await log.InsertOrUpdateLog(_dbQueryExecutor);
 
                 }
             }
-            //await Task.WhenAll(arquivosTxt.Select(async path =>
-            //{
-            //}));
+            
         }
 
         private MarketingDocuments MapOrdersFields(ListAttributeOrders pedido, int bpl, bool isUpdate = false)
@@ -130,7 +136,10 @@ namespace NEXX_SAWLUZIntegration.Services
                 DocDueDate = isUpdate ? (string?)null : DateTime.Now.ToString("yyyy-MM-dd"),
                 U_IdPrograma = pedido.Orders.FirstOrDefault()?.IdPrograma,
                 BPL_IDAssignedToInvoice = isUpdate ? (int?)null : bpl,
-                DocumentLines = pedido.Orders.Select(x => new MarketingDocuments.Documentline
+                DocumentLines = pedido.Orders
+                .OrderBy(x => x.CallDelivery)
+                .ThenBy(x => x.ProdutoCliente)
+                .Select(x => new MarketingDocuments.Documentline
                 {
                     ItemCode = x.ProdutoLocal,
                     Quantity =
@@ -229,7 +238,7 @@ namespace NEXX_SAWLUZIntegration.Services
         }
 
 
-        private async Task<QueryOrderExists> OrderExists(List<string> callDelivery, string tipodoc)
+        private async Task<QueryOrderExists> OrderExists(List<string> callDelivery, string tipodoc, string nomeArq)
         {
             try
             {
@@ -246,8 +255,8 @@ namespace NEXX_SAWLUZIntegration.Services
                 }
                 else if (tipodoc == "PD")
                 {
-                    var callDeliveryParam = string.Join(",", callDelivery.Select(cd => $"'{cd.Replace("'", "''")}'"));
-                    qr = string.Format(await SqlQueryLoader.LoadAsync("FindPedidoVenda.sql"), callDeliveryParam);
+                    //var callDeliveryParam = string.Join(",", callDelivery.Select(cd => $"'{cd.Replace("'", "''")}'"));
+                    qr = string.Format(await SqlQueryLoader.LoadAsync("FindPedidoVenda.sql"), nomeArq);
 
                     var ret = await _dbQueryExecutor.ExecuteQueryAsync<QueryOrderExists>(qr);
                     pedido = ret.ToList();
